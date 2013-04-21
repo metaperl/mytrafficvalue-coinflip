@@ -126,8 +126,8 @@ class Entry(object):
         self.click_payment_method_pulldown()
         time.sleep(1)
         print("Clicking Payment Method")
-        #self.click_payment_method('st') # solid trust pay
-        self.click_payment_method('ap')  # egopay
+        self.click_payment_method('st') # solid trust pay
+        #self.click_payment_method('ap')  # egopay
         self.input_bet(seq.next())
         time.sleep(4)
         self.guess_coin_toss('heads')
