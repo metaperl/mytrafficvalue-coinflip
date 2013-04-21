@@ -38,7 +38,8 @@ ten_minutes = 10 * one_minute
 one_hour    = 3600
 
 def martingale_sequence():
-    l = [0.25,2, 4, 8, 16, 32,66]
+    #l = [0.25,2, 4, 8, 16, 32,66]
+    l = [0.25, 0.52, 1.06, 2.15, 4.37, 8.87, 18.05]
     return iter(l)
 
 def url_for_action(action):
@@ -69,10 +70,12 @@ class Entry(object):
 
     def login(self):
         print("Logging in...")
-        self.browser.visit(url_for_action('login'))
-        self.browser.fill('user[email]', self.user['username'])
-        self.browser.fill('user[password]', self.user['password'])
-        button = self.browser.find_by_name('submit').first
+        self.browser.click_link_by_text('Login')
+        self.browser.fill('username', self.user['username'])
+        self.browser.fill('password', self.user['password'])
+
+        lookup = '//input[@type="submit"]'
+        button = self.browser.find_by_xpath(lookup)
         button.click()
 
     def input_bet(self,bet):
@@ -107,17 +110,17 @@ class Entry(object):
 
     def poll_for_login(self):
         print("\tPolling for successful login.")
+        time.sleep(5)
         at = self.browser.find_by_id('logout')
         if at:
             print("Logged in")
             return True
         else:
-            time.sleep(5)
+
             return self.poll_for_login()
 
     def trade(self, seq):
 
-        self.poll_for_login()
         self.browser.visit(url_for_action('coin_flip'))
         print("Clicking Payment Method Pulldown")
         self.click_payment_method_pulldown()
@@ -128,14 +131,15 @@ class Entry(object):
         self.input_bet(seq.next())
         time.sleep(4)
         self.guess_coin_toss('heads')
-        time.sleep(20)
+
+        time.sleep(10)
 
         if self.win():
             print("I win")
             return
         else:
             print("lost")
-
+            return self.trade(seq)
 
 
 def main(bid_url=None):
@@ -150,6 +154,7 @@ def main(bid_url=None):
         u = getattr(_u, key)
         e = Entry(u, browser, bid_url)
         e.browser.visit(base_url)
+        e.login()
 
         while True:
             s = martingale_sequence()
